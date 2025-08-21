@@ -3,109 +3,16 @@
 A comprehensive backend API system for monitoring restaurant store uptime and generating detailed reports. Built with FastAPI, SQLAlchemy, and advanced business hours logic.
 
 ## System Architecture
+<img width="3771" height="3840" alt="system_flow" src="https://github.com/user-attachments/assets/f0469a4f-46a1-4557-ba09-f37fda7b2dba" />
 
-\`\`\`mermaid
-graph TB
-    %% Data Input Layer
-    CSV1[store_status.csv] --> DI[Data Import Script]
-    CSV2[business_hours.csv] --> DI
-    CSV3[store_timezones.csv] --> DI
-    
-    %% Database Layer
-    DI --> DB[(SQLite Database)]
-    DB --> SS[Store Status Table]
-    DB --> BH[Business Hours Table]
-    DB --> TZ[Timezone Table]
-    DB --> RT[Report Table]
-    
-    %% API Layer
-    Client[Client Request] --> API[FastAPI Application]
-    API --> TR[/trigger_report]
-    API --> GR[/get_report/{id}]
-    API --> HC[/health]
-    
-    %% Report Generation Flow
-    TR --> RS[Report Service]
-    RS --> RG[Report Generator]
-    RG --> DP[Data Processor]
-    DP --> BHU[Business Hours Utils]
-    DP --> SS
-    DP --> BH
-    DP --> TZ
-    
-    %% Processing Logic
-    RG --> TC[Timezone Conversion]
-    RG --> BHF[Business Hours Filtering]
-    RG --> DI2[Data Interpolation]
-    RG --> UC[Uptime Calculation]
-    
-    %% Output Generation
-    UC --> CEU[CSV Export Utils]
-    CEU --> CSV[Generated CSV Report]
-    CSV --> RF[reports/ folder]
-    
-    %% Response Flow
-    GR --> RF
-    RF --> FR[File Response]
-    FR --> Client
-    
-    %% Background Processing
-    RS -.-> BT[Background Thread]
-    BT -.-> RG
-    
-    %% Status Tracking
-    RS --> RT
-    RT --> GR
-    
-    style API fill:#e1f5fe
-    style DB fill:#f3e5f5
-    style RG fill:#e8f5e8
-    style CSV fill:#fff3e0
-\`\`\`
 
 ## Data Flow Diagram
 
-\`\`\`mermaid
-sequenceDiagram
-    participant C as Client
-    participant API as FastAPI
-    participant RS as Report Service
-    participant RG as Report Generator
-    participant DB as Database
-    participant FS as File System
-    
-    %% Trigger Report
-    C->>API: POST /trigger_report
-    API->>RS: create_report()
-    RS->>DB: Insert report record
-    RS->>RG: generate_report_async()
-    Note over RG: Background thread starts
-    RS-->>API: report_id
-    API-->>C: {"report_id": "uuid"}
-    
-    %% Background Processing
-    RG->>DB: Query store data
-    RG->>RG: Process timezones
-    RG->>RG: Filter business hours
-    RG->>RG: Calculate uptime/downtime
-    RG->>FS: Save CSV report
-    RG->>DB: Update report status
-    
-    %% Poll for Results
-    C->>API: GET /get_report/{id}
-    API->>RS: get_report_status()
-    RS->>DB: Query report status
-    
-    alt Report Running
-        RS-->>API: {"status": "Running"}
-        API-->>C: Status JSON
-    else Report Complete
-        RS-->>API: File path
-        API->>FS: Read CSV file
-        FS-->>API: CSV content
-        API-->>C: CSV download
-    end
-\`\`\`
+<img width="1302" height="209" alt="data_flow" src="https://github.com/user-attachments/assets/4bfe5208-1881-4e60-83d5-a16daea5e5a7" />
+
+## API Sequences
+
+<img width="704" height="593" alt="api_sequence" src="https://github.com/user-attachments/assets/f32bec5d-d4c1-49d9-8d9d-92c88885ac82" />
 
 ## Features
 
